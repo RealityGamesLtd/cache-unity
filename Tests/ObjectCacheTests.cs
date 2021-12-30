@@ -91,7 +91,6 @@ namespace Tests
 
             var wasCacheHit = cache.GetFromCache(key, out string retrievedData);
 
-            LogAssert.Expect(LogType.Error, new Regex("^Cache expired.+"));
             Assert.IsFalse(wasCacheHit);
             Assert.IsNull(retrievedData);
         }
