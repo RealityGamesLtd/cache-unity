@@ -47,7 +47,6 @@ namespace Cache
 
             if (!dataFromCache.DoesNotAutoExpire && dataFromCache.Date < DateTime.Now)
             {
-                UnityEngine.Debug.LogError($"Cache expired {url}");
                 ExpireCacheData(url);
                 return false;
             }
