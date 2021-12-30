@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace Cache
@@ -6,6 +7,8 @@ namespace Cache
     public class UrlCache : ObjectCache
     {
         private readonly List<Regex> rules = new List<Regex>();
+
+        public UrlCache(int size, TimeSpan? ttl = null) : base(size, ttl) {}
 
         public void AddRule(Regex rx)
         {

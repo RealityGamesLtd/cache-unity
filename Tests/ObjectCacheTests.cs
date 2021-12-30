@@ -10,12 +10,55 @@ namespace Tests
 {
     public class ObjectCacheTests
     {
-        private ObjectCache cache = new ObjectCache();
 
-        [SetUp]
-        public void SetupCache()
+        [UnityTest]
+        public IEnumerator ExpirationTTLCacheTest()
         {
-            cache = new ObjectCache();
+            var key1 = Guid.NewGuid().ToString();
+            var key2 = Guid.NewGuid().ToString();
+            var key3 = Guid.NewGuid().ToString();
+            var data = "ASDF";
+            var cache = new ObjectCache(20, TimeSpan.FromSeconds(10));
+
+            cache.PutIntoCache(key1, data);
+            yield return new WaitForSeconds(3);
+            cache.PutIntoCache(key2, data);
+            yield return new WaitForSeconds(4);
+            cache.PutIntoCache(key3, data);
+
+            var wasCacheHit = cache.Contains(key1);
+            Assert.IsTrue(wasCacheHit);
+            wasCacheHit = cache.Contains(key2);
+            Assert.IsTrue(wasCacheHit);
+            wasCacheHit = cache.Contains(key3);
+            Assert.IsTrue(wasCacheHit);
+
+            yield return new WaitForSeconds(4);
+
+            wasCacheHit = cache.Contains(key1);
+            Assert.IsFalse(wasCacheHit);
+            wasCacheHit = cache.Contains(key2);
+            Assert.IsTrue(wasCacheHit);
+            cache.Contains(key3);
+            Assert.IsTrue(wasCacheHit);
+
+            yield return new WaitForSeconds(4);
+
+            wasCacheHit = cache.Contains(key1);
+            Assert.IsFalse(wasCacheHit);
+            wasCacheHit = cache.Contains(key2);
+            Assert.IsFalse(wasCacheHit);
+            wasCacheHit = cache.Contains(key3);
+            Assert.IsTrue(wasCacheHit);
+
+            yield return new WaitForSeconds(4);
+
+            wasCacheHit = cache.Contains(key1);
+            Assert.IsFalse(wasCacheHit);
+            wasCacheHit = cache.Contains(key2);
+            Assert.IsFalse(wasCacheHit);
+            wasCacheHit = cache.Contains(key3);
+            Assert.IsFalse(wasCacheHit);
         }
 
         [UnityTest]
@@ -23,6 +66,8 @@ namespace Tests
         {
             var key = Guid.NewGuid().ToString();
             var data = "ASDF";
+            var cache = new ObjectCache(20, null);
+
             cache.PutIntoCache(key, data);
 
             yield return new WaitForSeconds(1);
@@ -39,7 +84,8 @@ namespace Tests
         {
             var key = Guid.NewGuid().ToString();
             var data = "ASDF";
-            cache.PutIntoCache(key, data, TimeSpan.FromMilliseconds(1));
+            var cache = new ObjectCache(20, TimeSpan.FromMilliseconds(1));
+            cache.PutIntoCache(key, data);
 
             yield return new WaitForSeconds(1);
 
@@ -55,8 +101,8 @@ namespace Tests
         {
             var key = Guid.NewGuid().ToString();
             string data = null;
+            var cache = new ObjectCache(20, TimeSpan.FromMilliseconds(1));
             cache.PutIntoCache(key, data);
-
             var wasCacheHit = cache.GetFromCache(key, out string retrievedData);
 
             Assert.IsFalse(wasCacheHit);

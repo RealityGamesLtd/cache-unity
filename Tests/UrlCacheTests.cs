@@ -10,19 +10,12 @@ namespace Tests
 {
     public class UrlCacheTests
     {
-        private UrlCache cache = new UrlCache();
-
-        [SetUp]
-        public void SetupCache()
-        {
-            cache = new UrlCache();
-        }
-
         [UnityTest]
         public IEnumerator CachedWithNoTTLNotExpiresImmediately()
         {
             var key = Guid.NewGuid().ToString();
             var data = "ASDF";
+            var cache = new UrlCache(20, null);
             cache.PutIntoCache(key, data);
 
             yield return new WaitForSeconds(1);
@@ -39,7 +32,8 @@ namespace Tests
         {
             var key = Guid.NewGuid().ToString();
             var data = "ASDF";
-            cache.PutIntoCache(key, data, TimeSpan.FromMilliseconds(1));
+            var cache = new UrlCache(20, TimeSpan.FromMilliseconds(1));
+            cache.PutIntoCache(key, data);
 
             yield return new WaitForSeconds(1);
 
@@ -53,6 +47,7 @@ namespace Tests
         [Test]
         public void WillNotMatchWhenNoRulesWereAdded()
         {
+            var cache = new UrlCache(20, null);
             Assert.IsFalse(cache.MatchRules(null));
             Assert.IsFalse(cache.MatchRules(string.Empty));
             Assert.IsFalse(cache.MatchRules(""));
@@ -62,6 +57,7 @@ namespace Tests
         [Test]
         public void WillMatchWhenShould()
         {
+            var cache = new UrlCache(20, null);
             cache.AddRule(new Regex(".png$"));
             var wasMatch = cache.MatchRules("Obrazek.png");
 
@@ -71,6 +67,7 @@ namespace Tests
         [Test]
         public void WillNotMatchWhenShouldNot()
         {
+            var cache = new UrlCache(20, null);
             cache.AddRule(new Regex(".jpg$"));
             var wasMatch = cache.MatchRules("Obrazek.png");
 
