@@ -64,11 +64,14 @@ namespace Cache
 
         public bool Contains(string url)
         {
-            return cachedData.ContainsKey(url);
+            return url == null ? false : cachedData.ContainsKey(url);
         }
 
         public void ExpireCacheData(string url)
         {
+            if (url == null)
+                return;
+
             if (cachedData.ContainsKey(url))
             {
                 cachedData.Remove(url);
@@ -85,6 +88,7 @@ namespace Cache
             CacheData data = new CacheData(input, TTL == null ? null : DateTime.Now + TTL);
 
             if (data == null) return;
+
             if (cachedData.ContainsKey(url))
             {
                 cachedData.Remove(url);
