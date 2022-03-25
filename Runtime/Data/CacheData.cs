@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Cache.Data
 {
@@ -20,7 +21,9 @@ namespace Cache.Data
         public void Aquire() => referenceCount++;
         public void Release()
         {
-            referenceCount--;
+            if (--referenceCount < 0)
+                referenceCount = 0;
+
             if (referenceCount <= 0)
                 Dispose();
         }
