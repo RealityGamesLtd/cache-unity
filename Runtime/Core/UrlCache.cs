@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Cache
+namespace Cache.Core
 {
     public class UrlCache : ObjectCache
     {

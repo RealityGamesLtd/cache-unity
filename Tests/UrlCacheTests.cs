@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Text.RegularExpressions;
-using Cache;
+using Cache.Core;
+using Cache.Data;
 using NUnit.Framework;
+using UniRx;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -10,17 +12,28 @@ namespace Tests
 {
     public class UrlCacheTests
     {
+        public class CachedString : CacheData<string>
+        {
+            public CachedString(string data) : base(data) {}
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+            MainThreadDispatcher.Initialize();
+        }
+
         [UnityTest]
         public IEnumerator CachedWithNoTTLNotExpiresImmediately()
         {
             var key = Guid.NewGuid().ToString();
-            var data = "ASDF";
+            var data = new CachedString("ASDF");
             var cache = new UrlCache(20, null);
             cache.PutIntoCache(key, data);
 
             yield return new WaitForSeconds(1);
 
-            var wasCacheHit = cache.GetFromCache(key, out string retrievedData);
+            var wasCacheHit = cache.GetFromCache(key, out CachedString retrievedData);
 
             Assert.IsTrue(wasCacheHit);
             Assert.IsNotNull(retrievedData);
@@ -31,13 +44,13 @@ namespace Tests
         public IEnumerator CachedWithTTLExpires()
         {
             var key = Guid.NewGuid().ToString();
-            var data = "ASDF";
+            var data = new CachedString("ASDF");
             var cache = new UrlCache(20, TimeSpan.FromMilliseconds(1));
             cache.PutIntoCache(key, data);
 
             yield return new WaitForSeconds(1);
 
-            var wasCacheHit = cache.GetFromCache(key, out string retrievedData);
+            var wasCacheHit = cache.GetFromCache(key, out CachedString retrievedData);
 
             Assert.IsFalse(wasCacheHit);
             Assert.IsNull(retrievedData);
