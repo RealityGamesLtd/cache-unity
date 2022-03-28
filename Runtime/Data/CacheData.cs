@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 namespace Cache.Data
 {
@@ -15,7 +14,7 @@ namespace Cache.Data
         }
 
         public T Data { get; private set; }
-        public bool IsAlive => referenceCount > 0;
+        public bool IsFree => referenceCount <= 0;
 
         public virtual void Dispose() { }
         public void Aquire() => referenceCount++;
@@ -23,9 +22,6 @@ namespace Cache.Data
         {
             if (--referenceCount < 0)
                 referenceCount = 0;
-
-            if (referenceCount <= 0)
-                Dispose();
         }
     }
 }

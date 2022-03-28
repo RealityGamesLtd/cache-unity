@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
@@ -135,11 +134,14 @@ namespace Cache.Core
         {
             if (cachedData.TryGetValue(url, out var cachable))
             {               
-                var isAlive = (cachable as ICountable).IsAlive;
-                if (!isAlive)
+                var isFree = (cachable as ICountable).IsFree;
+                if (isFree)
+                {
                     (cachable as IDisposable).Dispose();
-
-                cachedData.Remove(url);
+                    cachedData.Remove(url);
+                }
+                else
+                    cachable.Date = DateTime.Now + TTL;
             }
         }
 

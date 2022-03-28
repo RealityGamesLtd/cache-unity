@@ -2,7 +2,7 @@
 {
     public interface ICountable
     {
-        public bool IsAlive { get; }
+        public bool IsFree { get; }
         void Release();
         void Aquire();
     }
