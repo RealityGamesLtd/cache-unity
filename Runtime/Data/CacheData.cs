@@ -5,23 +5,32 @@ namespace Cache.Data
     public abstract class CacheData<T> :
         Cachable, IDisposable, ICountable
     {
-        private int referenceCount;
+        public bool IsFree { get { return ReferenceCount <= 0; } }
+        public int ReferenceCount { get; private set; }
+        public T Data { get; private set; }
 
         public CacheData(T data)
         {
-            referenceCount = 0;
+            ReferenceCount = 0;
             Data = data;
         }
 
-        public T Data { get; private set; }
-        public bool IsFree => referenceCount <= 0;
+        public virtual void Dispose() {}
 
-        public virtual void Dispose() { }
-        public void Aquire() => referenceCount++;
+        public void Aquire()
+        {
+            ReferenceCount++;
+        }
+
         public void Release()
         {
-            if (--referenceCount < 0)
-                referenceCount = 0;
+            if (--ReferenceCount < 0)
+                ReferenceCount = 0;
+        }
+
+        public override UnityEngine.Object GetObject()
+        {
+            return Data as UnityEngine.Object;
         }
     }
 }

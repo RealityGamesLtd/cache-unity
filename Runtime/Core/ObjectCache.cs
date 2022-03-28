@@ -16,12 +16,15 @@ namespace Cache.Core
 
         TimeSpan? TTL { get; }
         int Size { get; }
+        bool IsFull { get; }
     }
 
     public class ObjectCache : ICache, IDisposable
     {
         public int Size { get; private set; }
         public TimeSpan? TTL { get; private set; }
+        public bool IsFull => cachedData.Count >= Size;
+        public Dictionary<string, Cachable> CachedData { get { return cachedData; } }
 
         private readonly Dictionary<string, Cachable> cachedData = new Dictionary<string, Cachable>();
         private readonly Timer timer;
