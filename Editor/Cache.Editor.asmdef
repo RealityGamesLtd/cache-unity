@@ -1,10 +1,12 @@
 {
-    "name": "Cache.Runtime",
+    "name": "Cache.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:560b04d1a97f54a4e82edc0cbbb69285"
+        "GUID:573c35bc3b24d4a248a13de42e4cf1bf"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

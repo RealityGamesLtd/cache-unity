@@ -2,27 +2,32 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
+using Cache.Data;
+using UniRx;
 
-namespace Cache
+namespace Cache.Core
 {
     public interface ICache
     {
-        bool GetFromCache<T>(string key, out T data) where T : class;
-        void PutIntoCache<T>(string key, T input) where T : class;
+        bool GetFromCache<T>(string key, out T data) where T : Cachable;
+        void PutIntoCache(string key, Cachable input);
         void ExpireCacheData(string key);
         void ExpireAllCachedData();
 
         TimeSpan? TTL { get; }
         int Size { get; }
+        bool IsFull { get; }
     }
 
     public class ObjectCache : ICache, IDisposable
     {
         public int Size { get; private set; }
         public TimeSpan? TTL { get; private set; }
+        public bool IsFull => cachedData.Count >= Size;
+        public Dictionary<string, Cachable> CachedData { get { return cachedData; } }
 
-        private readonly Dictionary<string, CacheData> cachedData = new Dictionary<string, CacheData>();
-        private Timer timer;
+        private readonly Dictionary<string, Cachable> cachedData = new Dictionary<string, Cachable>();
+        private readonly Timer timer;
 
         public ObjectCache(int size, TimeSpan? ttl = null)
         {
@@ -37,7 +42,7 @@ namespace Cache
         }
 
         public bool GetFromCache<T>(string url, out T data)
-            where T : class
+            where T : Cachable
         {
             cachedData.TryGetValue(url, out var dataFromCache);
             data = null;
@@ -51,76 +56,64 @@ namespace Cache
                 return false;
             }
 
-            if (!(dataFromCache.Data is T))
+            if (!(dataFromCache is T))
             {
                 UnityEngine.Debug.LogError($"Cache not in provided type {typeof(T)}");
                 return false;
             }
 
-            data = dataFromCache.Data as T;
+            data = dataFromCache as T;
             return true;
         }
 
         public bool Contains(string url)
         {
-            return url == null ? false : cachedData.ContainsKey(url);
+            return !string.IsNullOrEmpty(url) && cachedData.ContainsKey(url);
         }
 
         public void ExpireCacheData(string url)
         {
-            if (url == null)
-                return;
+            if (url == null) return;
 
-            if (cachedData.ContainsKey(url))
-            {
-                cachedData.Remove(url);
-            }
+            ExpireElement(url);
         }
 
-        public void PutIntoCache<T>(string url, T input)
-            where T : class
+        public void PutIntoCache(string url, Cachable input)
         {
             if (input == null) return;
+            if (cachedData.ContainsKey(url)) return;
 
-            HandleExpiration(null, null);
-
-            CacheData data = new CacheData(input, TTL == null ? null : DateTime.Now + TTL);
-
-            if (data == null) return;
-
-            if (cachedData.ContainsKey(url))
-            {
-                cachedData.Remove(url);
-            }
+            input.Date = TTL == null ? null : DateTime.Now + TTL;
 
             if (cachedData.Count < Size)
             {
-                cachedData.Add(url, data);
+                cachedData.Add(url, input);
                 UpdateInterval();
             }
         }
 
         private void UpdateInterval()
         {
-            var timeStamp = GetClosestTimeStamp();
-            if (timeStamp != null)
+            DateTime timeStamp = default;
+            if (cachedData != null && cachedData.Count > 0)
+                timeStamp = cachedData.Min(x => x.Value.Date ?? default);
+
+            if (!timeStamp.Equals(default) && timeStamp != null)
             {
-                var diff = timeStamp.Value.Subtract(DateTime.Now);
-                var time = diff.TotalMilliseconds;
-                var offset = time < 1 ? 500f : time;
-                timer.Interval = offset;
+                var diff = timeStamp.Subtract(DateTime.Now);
+                timer.Interval = diff.TotalMilliseconds < 1 ? 500f : diff.TotalMilliseconds;
                 timer.Start();
             }
             else
                 timer.Stop();
         }
 
-        private DateTime? GetClosestTimeStamp()
+        private void HandleExpiration(object sender, ElapsedEventArgs e)
         {
-            return cachedData.Min(x => x.Value.Date);
+            MainThreadDispatcher.Send((obj) => ExpireCoroutine(), null);
         }
 
-        private void HandleExpiration(object sender, ElapsedEventArgs e)
+        private void ExpireCoroutine()
         {
             List<string> toRemove = new List<string>();
             foreach (var pair in cachedData)
@@ -134,24 +127,31 @@ namespace Cache
                 toRemove.Add(url);
             }
 
-            if(toRemove.Count > 0)
-            {
-                foreach (var url in toRemove)
-                {
-                    if (cachedData.ContainsKey(url))
-                        cachedData.Remove(url);
-                }
+            foreach (var url in toRemove)
+                ExpireElement(url);
 
-                UpdateInterval();
+            UpdateInterval();
+        }
+
+        private void ExpireElement(string url)
+        {
+            if (cachedData.TryGetValue(url, out var cachable))
+            {               
+                var isFree = (cachable as ICountable).IsFree;
+                if (isFree)
+                {
+                    (cachable as IDisposable).Dispose();
+                    cachedData.Remove(url);
+                }
+                else
+                    cachable.Date = DateTime.Now + TTL;
             }
         }
 
         public void ExpireAllCachedData()
         {
             foreach (var pair in cachedData)
-            {
                 ExpireCacheData(pair.Key);
-            }
         }
 
         public void Dispose()

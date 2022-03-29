@@ -1,10 +1,11 @@
 {
     "name": "Cache.PlayMode",
+    "rootNamespace": "",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Server",
-        "Cache.Runtime"
+        "Cache.Runtime",
+        "UniRx"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
