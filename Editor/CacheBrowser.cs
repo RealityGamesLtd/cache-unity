@@ -9,7 +9,6 @@ namespace Cache
     public abstract class CacheBrowser : EditorWindow
     {
         private Vector2 scrollPos;
-        private Editor meshEditor;
 
         private void OnGUI()
         {
@@ -71,7 +70,7 @@ namespace Cache
                 {
                     TextureField(engineObj, data, spr);
                 }
-                if(data is Mesh mesh)
+                if (data is Mesh mesh)
                 {
                     MeshField(mesh);
                 }
@@ -86,22 +85,9 @@ namespace Cache
 
         private void MeshField(Mesh mesh)
         {
-            EditorGUI.BeginChangeCheck();
-            var obj = (GameObject)EditorGUILayout.ObjectField(mesh, typeof(Mesh), true);
-
-            if (EditorGUI.EndChangeCheck() && meshEditor != null)
-                DestroyImmediate(meshEditor);
-
-            GUIStyle bgColor = new GUIStyle();
-            bgColor.normal.background = EditorGUIUtility.whiteTexture;
-
-            if (obj != null)
-            {
-                if (meshEditor == null)
-                    meshEditor = Editor.CreateEditor(obj);
-
-                meshEditor.OnInteractivePreviewGUI(GUILayoutUtility.GetRect(256, 256), bgColor);
-            }
+            GUILayout.BeginVertical();
+            EditorGUILayout.ObjectField(mesh, typeof(Mesh), false);
+            GUILayout.EndVertical();
         }
 
         private void TextureField(UnityEngine.Object engineObj, dynamic data, Sprite texture)
