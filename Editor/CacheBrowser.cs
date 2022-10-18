@@ -26,8 +26,7 @@ namespace Cache
                 foreach (var elem in elements)
                 {
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                    EditorGUILayout.LabelField(elem.Key, GUILayout.ExpandWidth(true));
-                    ShowObject(elem.Value);
+                    ShowObject(elem.Key, elem.Value);
                     EditorGUILayout.EndVertical();
                 }
                 EditorGUILayout.EndScrollView();
@@ -45,7 +44,7 @@ namespace Cache
             }
         }
 
-        private void ShowObject(Cachable value)
+        private void ShowObject(string key, Cachable value)
         {
             if (value == null) return;
 
@@ -57,13 +56,15 @@ namespace Cache
                 wordWrap = true
             };
 
+            EditorGUILayout.LabelField(key, GUILayout.ExpandWidth(true));
+
+            var diff = value.Date - DateTime.Now;
+            if (diff.Value.TotalSeconds > 0)
+                EditorGUILayout.LabelField($"Left time: {diff}", style);
+
             if (data is UnityEngine.Object engineObj)
             {
                 var name = engineObj.name;
-                var diff = value.Date - DateTime.Now;
-                if (diff.Value.TotalSeconds > 0)
-                    EditorGUILayout.LabelField($"Left time: {diff}", style);
-
                 EditorGUILayout.LabelField(name, style);
                 EditorGUILayout.ObjectField(engineObj, data.GetType(), false);
                 if (data is Sprite spr)

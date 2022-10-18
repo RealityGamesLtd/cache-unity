@@ -6,6 +6,9 @@ namespace Cache.Data
     {
         public DateTime? Date { get; set; }
         public bool DoesNotAutoExpire => Date == null;
-        public abstract UnityEngine.Object GetObject();
+
+#if UNITY_EDITOR
+        public abstract dynamic GetObject();
+#endif
     }
 }

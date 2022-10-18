@@ -28,9 +28,11 @@ namespace Cache.Data
                 ReferenceCount = 0;
         }
 
-        public override UnityEngine.Object GetObject()
+#if UNITY_EDITOR
+        public override dynamic GetObject()
         {
-            return Data as UnityEngine.Object;
+            return Data;
         }
+#endif
     }
 }
