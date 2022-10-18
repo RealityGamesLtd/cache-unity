@@ -9,6 +9,7 @@ namespace Cache
     public abstract class CacheBrowser : EditorWindow
     {
         private Vector2 scrollPos;
+        private Editor meshEditor;
 
         private void OnGUI()
         {
@@ -66,10 +67,13 @@ namespace Cache
             {
                 var name = engineObj.name;
                 EditorGUILayout.LabelField(name, style);
-                EditorGUILayout.ObjectField(engineObj, data.GetType(), false);
                 if (data is Sprite spr)
                 {
-                    TextureField(spr.texture);
+                    TextureField(engineObj, data, spr);
+                }
+                if(data is Mesh mesh)
+                {
+                    MeshField(mesh);
                 }
             }
 
@@ -80,8 +84,29 @@ namespace Cache
             }
         }
 
-        private void TextureField(Texture2D texture)
+        private void MeshField(Mesh mesh)
         {
+            EditorGUI.BeginChangeCheck();
+            var obj = (GameObject)EditorGUILayout.ObjectField(mesh, typeof(Mesh), true);
+
+            if (EditorGUI.EndChangeCheck() && meshEditor != null)
+                DestroyImmediate(meshEditor);
+
+            GUIStyle bgColor = new GUIStyle();
+            bgColor.normal.background = EditorGUIUtility.whiteTexture;
+
+            if (obj != null)
+            {
+                if (meshEditor == null)
+                    meshEditor = Editor.CreateEditor(obj);
+
+                meshEditor.OnInteractivePreviewGUI(GUILayoutUtility.GetRect(256, 256), bgColor);
+            }
+        }
+
+        private void TextureField(UnityEngine.Object engineObj, dynamic data, Sprite texture)
+        {
+            EditorGUILayout.ObjectField(engineObj, data.GetType(), false);
             GUILayout.BeginVertical();
             EditorGUILayout.ObjectField(texture, typeof(Texture2D), false, GUILayout.Width(50), GUILayout.Height(50));
             GUILayout.EndVertical();
