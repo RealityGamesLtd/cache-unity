@@ -16,12 +16,14 @@ namespace Cache.Core
 
         TimeSpan? TTL { get; }
         int Size { get; }
+        long Memory { get; }
         bool IsFull { get; }
     }
 
     public class ObjectCache : ICache, IDisposable
     {
         public int Size { get; private set; }
+        public long Memory { get; private set; }
         public TimeSpan? TTL { get; private set; }
         public bool IsFull => cachedData.Count >= Size;
         public Dictionary<string, Cachable> CachedData { get { return cachedData; } }
@@ -87,6 +89,7 @@ namespace Cache.Core
 
             if (cachedData.Count < Size)
             {
+                Memory += input.Size;
                 cachedData.Add(url, input);
                 UpdateInterval();
             }
@@ -140,6 +143,7 @@ namespace Cache.Core
                 var isFree = (cachable as ICountable).IsFree;
                 if (isFree)
                 {
+                    Memory -= cachable.Size;
                     (cachable as IDisposable).Dispose();
                     cachedData.Remove(url);
                 }
