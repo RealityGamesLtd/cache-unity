@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Cache.Core;
 using Cache.Data;
 using UnityEditor;
@@ -18,6 +20,9 @@ namespace Cache
                 var elements = cache.CachedData;
 
                 EditorGUILayout.LabelField($"Elements: {elements.Count}",
+                    new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter },
+                    GUILayout.ExpandWidth(true));
+                EditorGUILayout.LabelField($"Size: {CalculateSize(elements)} bytes",
                     new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter },
                     GUILayout.ExpandWidth(true));
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -42,6 +47,17 @@ namespace Cache
                 EditorGUILayout.EndVertical();
                 Repaint();
             }
+        }
+
+        private float CalculateSize(Dictionary<string, Cachable> elements)
+        {
+            float size = 0f;
+            foreach(var elem in elements)
+            {
+                size += Marshal.SizeOf(elem.Value);
+            }
+
+            return size;
         }
 
         private void ShowObject(string key, Cachable value)
