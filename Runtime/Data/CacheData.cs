@@ -5,7 +5,7 @@ namespace Cache.Data
     public abstract class CacheData<T> :
         Cachable, IDisposable, ICountable
     {
-        public bool IsFree { get { return ReferenceCount <= 0; } }
+        public bool IsFree => ReferenceCount <= 0;
         public int ReferenceCount { get; private set; }
         public T Data { get; private set; }
 
@@ -25,7 +25,10 @@ namespace Cache.Data
         public void Release()
         {
             if (--ReferenceCount < 0)
+            {
                 ReferenceCount = 0;
+                Dispose();
+            }
         }
 
 #if UNITY_EDITOR
