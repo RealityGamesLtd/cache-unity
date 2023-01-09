@@ -9,25 +9,26 @@ namespace Cache.Data
         public int ReferenceCount { get; private set; }
         public T Data { get; private set; }
 
-        public CacheData(T data)
+        public CacheData(T data, string url)
         {
             ReferenceCount = 0;
             Data = data;
+            ID = url;
         }
 
-        public virtual void Dispose() {}
+        public abstract void Dispose();
 
         public void Aquire()
         {
             ReferenceCount++;
         }
 
-        public void Release()
+        public override void Release()
         {
             if (--ReferenceCount < 0)
             {
                 ReferenceCount = 0;
-                Dispose();
+                base.Release();
             }
         }
 
