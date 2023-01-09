@@ -13,16 +13,15 @@ namespace Tests
     {
         public class CachedString : CacheData<string>
         {
-            public CachedString(string data) : base(data) { }
+            public CachedString(string data, string url) : base(data, url) { }
         }
 
-        public class CachedTexture : CacheData<Texture2D>
+        public class CachedTexture : CacheData<Texture2D>, IDisposable
         {
-            public CachedTexture(Texture2D tex) : base(tex) { }
+            public CachedTexture(Texture2D tex, string url) : base(tex, url) { }
 
-            public override void Dispose()
+            public void Dispose()
             {
-                base.Dispose();
                 UnityEngine.Object.Destroy(Data);
             }
         }
@@ -39,9 +38,9 @@ namespace Tests
             var key1 = Guid.NewGuid().ToString();
             var key2 = Guid.NewGuid().ToString();
             var key3 = Guid.NewGuid().ToString();
-            var data = new CachedString("ASDF");
-            var data2 = new CachedTexture(new Texture2D(120, 120));
-            var data3 = new CachedString("ASDF");
+            var data = new CachedString("ASDF", key1);
+            var data2 = new CachedTexture(new Texture2D(120, 120), key2);
+            var data3 = new CachedString("ASDF", key3);
 
             var cache = new ObjectCache(20, TimeSpan.FromSeconds(10));
 
@@ -90,7 +89,7 @@ namespace Tests
         public IEnumerator CachedWithNoTTLNotExpiresImmediately()
         {
             var key = Guid.NewGuid().ToString();
-            var data = new CachedString("ASDF");
+            var data = new CachedString("ASDF", key);
             var cache = new ObjectCache(20, null);
 
             cache.PutIntoCache(key, data);
@@ -108,7 +107,7 @@ namespace Tests
         public IEnumerator CachedWithTTLExpires()
         {
             var key = Guid.NewGuid().ToString();
-            var data = new CachedString("ASDF");
+            var data = new CachedString("ASDF", key);
             var cache = new ObjectCache(20, TimeSpan.FromMilliseconds(1));
             cache.PutIntoCache(key, data);
 

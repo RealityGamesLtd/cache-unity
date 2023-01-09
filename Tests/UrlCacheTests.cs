@@ -14,7 +14,7 @@ namespace Tests
     {
         public class CachedString : CacheData<string>
         {
-            public CachedString(string data) : base(data) {}
+            public CachedString(string data, string url) : base(data, url) {}
         }
 
         [SetUp]
@@ -27,7 +27,7 @@ namespace Tests
         public IEnumerator CachedWithNoTTLNotExpiresImmediately()
         {
             var key = Guid.NewGuid().ToString();
-            var data = new CachedString("ASDF");
+            var data = new CachedString("ASDF", key);
             var cache = new UrlCache(20, null);
             cache.PutIntoCache(key, data);
 
@@ -44,7 +44,7 @@ namespace Tests
         public IEnumerator CachedWithTTLExpires()
         {
             var key = Guid.NewGuid().ToString();
-            var data = new CachedString("ASDF");
+            var data = new CachedString("ASDF", key);
             var cache = new UrlCache(20, TimeSpan.FromMilliseconds(1));
             cache.PutIntoCache(key, data);
 

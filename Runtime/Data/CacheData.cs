@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace Cache.Data
+﻿namespace Cache.Data
 {
     public abstract class CacheData<T> :
-        Cachable, IDisposable, ICountable
+        Cachable, ICountable
     {
         public bool IsFree => ReferenceCount <= 0;
         public int ReferenceCount { get; private set; }
@@ -15,8 +13,6 @@ namespace Cache.Data
             Data = data;
             ID = url;
         }
-
-        public abstract void Dispose();
 
         public void Aquire()
         {

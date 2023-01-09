@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Cache.Core;
 using Cache.Data;
 using UnityEditor;
@@ -22,9 +20,9 @@ namespace Cache
                 EditorGUILayout.LabelField($"Elements: {elements.Count}",
                     new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter },
                     GUILayout.ExpandWidth(true));
-                EditorGUILayout.LabelField($"Size: {cache.Memory} bytes",
-                    new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter },
-                    GUILayout.ExpandWidth(true));
+                //EditorGUILayout.LabelField($"Size: {cache.Memory} bytes",
+                //    new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter },
+                //    GUILayout.ExpandWidth(true));
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
                 scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
