@@ -21,7 +21,7 @@
 
         public override void Release()
         {
-            if (--ReferenceCount < 0)
+            if (--ReferenceCount <= 0)
             {
                 ReferenceCount = 0;
                 base.Release();
