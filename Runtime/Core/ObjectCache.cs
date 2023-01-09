@@ -145,6 +145,7 @@ namespace Cache.Core
                 {
                     Memory -= cachable.Size;
                     (cachable as IDisposable).Dispose();
+                    GC.Collect();
                     cachedData.Remove(url);
                 }
                 else
@@ -162,6 +163,7 @@ namespace Cache.Core
         {
             timer?.Close();
             timer?.Dispose();
+            GC.Collect();
         }
     }
 }
